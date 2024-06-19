@@ -38,6 +38,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'TiffinBox.apps.TiffinboxConfig',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'django_filters',
+    'django_otp',
+    'django_otp.plugins.otp_static',
+    'django_otp.plugins.otp_totp',
+    'api'
 ]
 
 MIDDLEWARE = [
