@@ -25,7 +25,11 @@ SECRET_KEY = 'django-insecure-@wc3g^e_(hy3a$hsnu2ou$9qzbzp6@16hslk%3*&oli24dzuo@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '192.168.56.1'
+]
 
 
 # Application definition
@@ -44,7 +48,6 @@ INSTALLED_APPS = [
     'django_otp',
     'django_otp.plugins.otp_static',
     'django_otp.plugins.otp_totp',
-    'api'
 ]
 
 MIDDLEWARE = [
