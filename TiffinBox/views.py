@@ -29,6 +29,21 @@ def login(request):
     return JsonResponse({"status": "success", "user": user})
 
 
+@csrf_exempt
+def signup(request):
+    data = json.loads(request.body)
+    email = data.get("email")
+    password = data.get("password")
+    phone = data.get("phoneNumber")
+    name = data.get("fullName")
+    print(email, password, phone, name)
+
+    user = auth.create_user_with_email_and_password(email, password)
+    print(user)
+    return JsonResponse({"status": "success", "user": user})
+
+
 # Create your views here.
 def index(request):
     return  JsonResponse({"message": "Hello, world!"})
+
