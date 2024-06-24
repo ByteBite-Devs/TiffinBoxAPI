@@ -1,4 +1,5 @@
 import json
+import random
 from django.http import JsonResponse
 import pyrebase
 from django.views.decorators.csrf import csrf_exempt
@@ -47,3 +48,39 @@ def signup(request):
 def index(request):
     return  JsonResponse({"message": "Hello, world!"})
 
+
+@csrf_exempt
+def send_otp(request):
+    phone_number = request.POST.get("phone")
+    otp = ''.join(random.choices('0123456789', k=6))
+    return JsonResponse({"status": "error", "message": str(e)})
+
+@csrf_exempt
+def verify_otp(request):
+    phone_number = request.POST.get("phone")
+    otp = request.POST.get("otp")
+    print(phone_number, otp)
+    try:
+        firebase.auth().sign_in_with_phone_number(phone_number, otp)
+        return JsonResponse({"status": "success"})
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)})
+
+
+
+
+@csrf_exempt
+def verify_phone_number(request):
+    if request.method == 'POST':
+        verification_id = request.POST.get('verificationId')
+        sms_code = request.POST.get('smsCode')
+
+        try:
+            credential = auth.PhoneAuthProvider.credential(verification_id, sms_code)
+            user = auth.get_user(credential)
+            # Optionally, perform further actions with the authenticated user
+            return JsonResponse({'success': True, 'message': 'Verification successful'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+
+    return JsonResponse({'success': False, 'message': 'Invalid request method'})
