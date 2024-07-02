@@ -23,6 +23,8 @@ firebase = pyrebase.initialize_app(config)
 
 auth = firebase.auth()
 
+db = firebase.database()
+
 
 @csrf_exempt
 def login(request):
@@ -47,7 +49,6 @@ def signup(request):
     user = auth.create_user_with_email_and_password(email, password)
     print(user)
     # create user in cloud firestore
-    db = firebase.database()
     db.child("Users").child(user["localId"]).set({
         "email": email,
         "phone": phone,
@@ -64,6 +65,15 @@ def signup(request):
 # Create your views here.
 def index(request):
     return JsonResponse({"message": "Hello, world!"})
+
+
+def profile(request):
+    user_id = request.GET.get("id")
+    user = db.child("Users").child(user_id).get().val()
+    if user:
+        return JsonResponse({"status": "success", "user": user})
+    else:
+        return JsonResponse({"status": "error", "message": "User not found"})
 
 
 @csrf_exempt
