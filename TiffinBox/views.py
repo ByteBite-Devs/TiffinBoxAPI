@@ -1,12 +1,10 @@
 import json
 import random
 
-from django.db.models.functions import SHA256
+import firebase_admin
+from firebase_admin import auth as firebase_auth, credentials
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from firebase_admin import auth as firebase_auth
-from firebase_admin import credentials as firebase_credentials
-from firebase_admin import messaging as firebase_messaging
 import pyrebase
 
 config = {
@@ -20,10 +18,13 @@ config = {
 }
 
 firebase = pyrebase.initialize_app(config)
-
 auth = firebase.auth()
-
 db = firebase.database()
+
+SERVICE_ACCOUNT_KEY_PATH = "config/serviceAccountKey.json"
+if not firebase_admin._apps:
+    credentials = credentials.Certificate(SERVICE_ACCOUNT_KEY_PATH)
+    firebase_admin.initialize_app(credentials)
 
 
 @csrf_exempt
@@ -31,10 +32,16 @@ def login(request):
     data = json.loads(request.body)
     email = data.get("email")
     password = data.get("password")
-    print(email, password)
+
     user = auth.sign_in_with_email_and_password(email, password)
+
+    if user is None:
+        return JsonResponse({"status": "error", "message": "Invalid credentials"})
+
     print(user)
-    return JsonResponse({"status": "success", "user": user})
+    uid = user["localId"]
+    custom_token = firebase_auth.create_custom_token(uid)
+    return JsonResponse({"status": "success", "user": user, "customToken": custom_token.decode("utf-8")})
 
 
 @csrf_exempt
@@ -67,9 +74,8 @@ def index(request):
     return JsonResponse({"message": "Hello, world!"})
 
 
-def profile(request):
-    user_id = request.GET.get("id")
-    user = db.child("Users").child(user_id).get().val()
+def profile(request, id: str):
+    user = db.child("Users").child(id).get().val()
     if user:
         return JsonResponse({"status": "success", "user": user})
     else:
