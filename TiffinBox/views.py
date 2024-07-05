@@ -1,6 +1,5 @@
 import json
-import random
-
+import jwt
 import firebase_admin
 from firebase_admin import auth as firebase_auth, credentials
 from django.http import JsonResponse
@@ -23,8 +22,16 @@ db = firebase.database()
 
 SERVICE_ACCOUNT_KEY_PATH = "config/serviceAccountKey.json"
 if not firebase_admin._apps:
-    credentials = credentials.Certificate(SERVICE_ACCOUNT_KEY_PATH)
-    firebase_admin.initialize_app(credentials)
+    cred = credentials.Certificate(SERVICE_ACCOUNT_KEY_PATH)
+    firebase_admin.initialize_app(cred)
+
+
+def validate_token(token):
+    try:
+        decoded_token = jwt.decode(token, options={"verify_signature": False})
+        print("Token is valid")
+    except Exception as e:
+        print(f"Token validation error: {e}")
 
 
 @csrf_exempt
@@ -33,15 +40,16 @@ def login(request):
     email = data.get("email")
     password = data.get("password")
 
-    user = auth.sign_in_with_email_and_password(email, password)
-
-    if user is None:
-        return JsonResponse({"status": "error", "message": "Invalid credentials"})
-
-    print(user)
-    uid = user["localId"]
-    custom_token = firebase_auth.create_custom_token(uid)
-    return JsonResponse({"status": "success", "user": user, "customToken": custom_token.decode("utf-8")})
+    try:
+        user = auth.sign_in_with_email_and_password(email, password)
+        uid = user["localId"]
+        custom_token = firebase_auth.create_custom_token(uid)
+        validate_token(custom_token.decode("utf-8"))
+        user = db.child("Users").child(uid).get().val()
+        print(f"Custom token: {custom_token.decode('utf-8')}")
+        return JsonResponse({"status": "success", "user": user, "customToken": custom_token.decode("utf-8")})
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)})
 
 
 @csrf_exempt
@@ -51,45 +59,29 @@ def signup(request):
     password = data.get("password")
     phone = data.get("phoneNumber")
     name = data.get("fullName")
-    print(email, password, phone, name)
 
-    user = auth.create_user_with_email_and_password(email, password)
-    print(user)
-    # create user in cloud firestore
-    db.child("Users").child(user["localId"]).set({
-        "email": email,
-        "phone": phone,
-        "name": name,
-        "password": password,
-        "id": user["localId"],
-        "role": "client",
-        "status": "active",
-        "image": ""
-    })
-    return JsonResponse({"status": "success", "user": user})
-
-
-# Create your views here.
-def index(request):
-    return JsonResponse({"message": "Hello, world!"})
-
-
-def profile(request, id: str):
-    user = db.child("Users").child(id).get().val()
-    if user:
+    try:
+        user = auth.create_user_with_email_and_password(email, password)
+        user_data = {
+            "email": email,
+            "phone": phone,
+            "name": name,
+            "role": "client",
+            "status": "active",
+            "image": ""
+        }
+        db.child("Users").child(user["localId"]).set(user_data)
         return JsonResponse({"status": "success", "user": user})
-    else:
-        return JsonResponse({"status": "error", "message": "User not found"})
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)})
 
 
 @csrf_exempt
 def send_otp(request):
     phone_number = request.POST.get("phone")
-    otp = ''.join(random.choices('0123456789', k=6))
-    print(phone_number, otp)
     try:
-        firebase.auth().sign_in_with_phone_number(phone_number, otp)
-        return JsonResponse({"status": "success"})
+        verification_id = auth.generate_phone_number_verification_code(phone_number)
+        return JsonResponse({"status": "success", "verificationId": verification_id})
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)})
 
@@ -98,10 +90,10 @@ def send_otp(request):
 def verify_otp(request):
     phone_number = request.POST.get("phone")
     otp = request.POST.get("otp")
-    print(phone_number, otp)
     try:
-        firebase.auth().sign_in_with_phone_number(phone_number, otp)
-        return JsonResponse({"status": "success"})
+        credential = auth.verify_phone_number(otp, phone_number)
+        user = auth.get_user(credential)
+        return JsonResponse({"status": "success", "user": user})
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)})
 
@@ -113,7 +105,7 @@ def verify_phone_number(request):
         sms_code = request.POST.get('smsCode')
 
         try:
-            credential = auth.PhoneAuthProvider.credential(verification_id, sms_code)
+            credential = auth.verify_phone_number(verification_id, sms_code)
             user = auth.get_user(credential)
             # Optionally, perform further actions with the authenticated user
             return JsonResponse({'success': True, 'message': 'Verification successful'})
@@ -121,3 +113,19 @@ def verify_phone_number(request):
             return JsonResponse({'success': False, 'message': str(e)})
 
     return JsonResponse({'success': False, 'message': 'Invalid request method'})
+
+
+@csrf_exempt
+def profile(request, id):
+    try:
+        user = db.child("Users").child(id).get().val()
+        if user:
+            return JsonResponse({"status": "success", "user": user})
+        else:
+            return JsonResponse({"status": "error", "message": "User not found"})
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)})
+
+
+def index(request):
+    return JsonResponse({"message": "Hello, world!"})
