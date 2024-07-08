@@ -53,30 +53,6 @@ def login(request):
 
 
 @csrf_exempt
-def signup(request):
-    data = json.loads(request.body)
-    email = data.get("email")
-    password = data.get("password")
-    phone = data.get("phoneNumber")
-    name = data.get("fullName")
-
-    try:
-        user = auth.create_user_with_email_and_password(email, password)
-        user_data = {
-            "email": email,
-            "phone": phone,
-            "name": name,
-            "role": "client",
-            "status": "active",
-            "image": ""
-        }
-        db.child("Users").child(user["localId"]).set(user_data)
-        return JsonResponse({"status": "success", "user": user})
-    except Exception as e:
-        return JsonResponse({"status": "error", "message": str(e)})
-
-
-@csrf_exempt
 def send_otp(request):
     phone_number = request.POST.get("phone")
     try:
