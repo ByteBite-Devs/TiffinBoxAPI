@@ -8,4 +8,6 @@ urlpatterns = [
     path('login-phone', auth.loginWithPhone),
     path('login-google', auth.loginWithGoogle),
     path('profile/<str:id>', views.profile),
+
+    path('business_signup', auth.business_signup),
 ]

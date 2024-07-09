@@ -44,8 +44,8 @@ def login(request):
         user = auth.sign_in_with_email_and_password(email, password)
         uid = user["localId"]
         custom_token = firebase_auth.create_custom_token(uid)
-        validate_token(custom_token.decode("utf-8"))
         user = db.child("Users").child(uid).get().val()
+        print(f"User: {user}")
         print(f"Custom token: {custom_token.decode('utf-8')}")
         return JsonResponse({"status": "success", "user": user, "customToken": custom_token.decode("utf-8")})
     except Exception as e:
