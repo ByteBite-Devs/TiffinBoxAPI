@@ -91,33 +91,6 @@ def verify_phone_number(request):
     return JsonResponse({'success': False, 'message': 'Invalid request method'})
 
 
-@csrf_exempt
-def profile(request, id):
-    if request.method == "GET":
-        return get_profile(request, id)
-    else:
-        return update_profile(request, id)
-
-
-def update_profile(request, id):
-    try:
-        data = json.loads(request.body)
-        db.child("Users").child(id).update(data)
-        user = db.child("Users").child(id).get().val()
-        return JsonResponse({"status": "success", "user": user})
-    except Exception as e:
-        return JsonResponse({"status": "error", "message": str(e)})
-
-def get_profile(request, id):
-    try:
-        user = db.child("Users").child(id).get().val()
-        if user:
-            return JsonResponse({"status": "success", "user": user})
-        else:
-            return JsonResponse({"status": "error", "message": "User not found"})
-    except Exception as e:
-        return JsonResponse({"status": "error", "message": str(e)})
-
 
 def index(request):
     return JsonResponse({"message": "Hello, world!"})
