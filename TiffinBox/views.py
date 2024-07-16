@@ -93,4 +93,17 @@ def verify_phone_number(request):
 
 
 def index(request):
-    return JsonResponse({"message": "Hello, world!"})
+
+    # fetch all businesses and thier tiffins
+    businesses = db.child("Users").order_by_child("role").equal_to("business").get().val()
+    for key, business in businesses.items():
+        business['id'] = key
+    businesses = list(businesses.values())
+    tiffins = db.child("Tiffins").order_by_child("business_id").get().val()
+    for key, tiffin in tiffins.items():
+        tiffin['id'] = key
+    tiffins = list(tiffins.values())
+    print(tiffins)
+
+
+    return JsonResponse({"status": "success", "businesses": businesses, "tiffins": tiffins})

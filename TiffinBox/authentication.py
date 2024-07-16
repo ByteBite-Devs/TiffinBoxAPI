@@ -1,7 +1,4 @@
 import json
-import jwt
-import firebase_admin
-from firebase_admin import auth as firebase_auth, credentials
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import pyrebase

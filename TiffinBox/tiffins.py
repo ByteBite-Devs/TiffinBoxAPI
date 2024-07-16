@@ -31,6 +31,10 @@ def tiffins(request):
 def tiffin(request, id):
     if request.method == "GET":
         tiffin = db.child("Tiffins").child(id).get().val()
+        if not tiffin:
+            return JsonResponse({"status": "error", "message": "Tiffin not found"})
+        tiffin["id"] = id
+        print(tiffin)
         return JsonResponse({"status": "success", "tiffin": tiffin})
     else:
         data = json.loads(request.body)
@@ -45,3 +49,4 @@ def add_tiffin(request):
     db.child("Tiffins").push(data)
     tiffins = db.child("Tiffins").get().val()
     return JsonResponse({"status": "success", "tiffins": tiffins})
+
