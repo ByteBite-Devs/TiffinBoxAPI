@@ -50,3 +50,18 @@ def add_tiffin(request):
     tiffins = db.child("Tiffins").get().val()
     return JsonResponse({"status": "success", "tiffins": tiffins})
 
+
+def business_tiffins(request, id):
+    tiffins = db.child("Tiffins").order_by_child("business_id").equal_to(id).get().val()
+    for key,tiffin in tiffins.items():
+        tiffin["id"] = key
+    print(tiffins)
+    return JsonResponse({"status": "success", "tiffins": tiffins})
+
+
+@csrf_exempt
+def update_tiffin(request):
+    data = json.loads(request.body)
+    db.child("Tiffins").child(data["id"]).update(data)
+    tiffin = db.child("Tiffins").child(data["id"]).get().val()
+    return JsonResponse({"status": "success", "tiffin": tiffin})

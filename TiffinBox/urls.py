@@ -18,7 +18,9 @@ urlpatterns = [
     path('business_signup', auth.business_signup),
     path('tiffins', tiffin.tiffins),
     path('tiffin/<str:id>', tiffin.tiffin),
-    path('add_tiffin', tiffin.add_tiffin),
+    path('tiffins/add_tiffin', tiffin.add_tiffin),
+    path('tiffins/update_tiffin', tiffin.update_tiffin),
+    path('tiffins/business/<str:id>', tiffin.business_tiffins),
 
     path('business/<str:id>', business.get_business),
 ]
