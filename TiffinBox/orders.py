@@ -50,7 +50,6 @@ def create_order(request):
         currentOrders.append(order)
     # SEND the latest order only
     currentOrders = currentOrders[-1]
-    print(currentOrders)
     return JsonResponse({"status": "success", "orders": currentOrders})
 
 
@@ -62,7 +61,9 @@ def get_orders(request, id):
         return JsonResponse({"status": "error", "message": "Orders not found"})
     for key, order in orders.items():
         order["id"] = key
-    print(orders)
+        for item in order["items"]:
+            item["tiffin"] = db.child("Tiffins").child(item["id"]).get().val()
+            order['business'] = db.child("Users").child(item["tiffin"]["business_id"]).get().val()
     orders = list(orders.values())
     return JsonResponse({"status": "success", "orders": orders})
 
@@ -72,13 +73,11 @@ def getOrder(request, id):
     if not order:
         return JsonResponse({"status": "error", "message": "Order not found"})
     order = list(order.values())[0]
-    print(order)
     if not order:
         return JsonResponse({"status": "error", "message": "Order not found"})
     address = db.child("Addresses").child(order["address"]).get().val()
     # add urder id (key to the order object)
     order["id"] = list(order.keys())[0]
-    print(order)
     return JsonResponse({"status": "success", "order": order, "address": address})
 
 
@@ -106,6 +105,26 @@ def getBusinessOrders(request, id):
     if not orders:
         return JsonResponse({"status": "error", "message": "No orders found for this business"})
 
-    print(orders)
-
     return JsonResponse({"status": "success", "orders": orders})
+
+@csrf_exempt
+
+
+def update_order(request, id, status):
+    order = db.child("Orders").child(id).get().val()
+    if not order:
+        return JsonResponse({"status": "error", "message": "Order not found"})
+    order["order_status"] = status
+    db.child("Orders").child(id).update(order)
+    order = db.child("Orders").child(id).get().val()
+    return JsonResponse({"status": "success", "order": order})
+
+
+@csrf_exempt
+def updateDeliveryInformation(request, id):
+    data = json.loads(request.body)
+    db.child("Orders").order_by_child("order_number").equal_to(id).update(data)
+    order = db.child("Orders").child(id).get().val()
+    if not order:
+        return JsonResponse({"status": "error", "message": "Order not found"})
+    return JsonResponse({"status": "success", "order": order})

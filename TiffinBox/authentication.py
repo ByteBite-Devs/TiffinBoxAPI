@@ -21,13 +21,11 @@ db = firebase.database()
 @csrf_exempt
 def loginWithGoogle(request):
     data = json.loads(request.body)
-    print(data)
     email = data.get("email")
     phone = data.get("phoneNumber")
     name = data.get("fullName")
     id = data.get("googleId")
     photoUrl = data.get("profileImageUrl")
-
     existingUser = db.child("Users").child(id).get().val()
 
     if existingUser is None:
@@ -95,7 +93,6 @@ def loginWithPhone(request):
             }
             db.child("Users").child(id).set(user_data)
             user = db.child("Users").child(id).get().val()
-            print(user)
             return JsonResponse({"status": "success", "user": user})
         except Exception as e:
             return JsonResponse({"status": "error", "message": str(e)})

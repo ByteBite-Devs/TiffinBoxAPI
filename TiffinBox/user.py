@@ -92,7 +92,6 @@ def set_default_address(request, id):
             db.child("Addresses").child(key).update(addr)
 
         all_addresses = db.child("Addresses").order_by_child("user_id").equal_to(address["user_id"]).get().val()
-        print("All addresses: ", all_addresses)
         return JsonResponse({"status": "success", "address": address, "user": user})
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)})

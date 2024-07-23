@@ -27,5 +27,8 @@ urlpatterns = [
     path('order/create', orders.create_order),
     path('order/all/<str:id>', orders.get_orders),
     path('order/<int:id>', orders.getOrder),
+    path('order/update/<int:id>/<str:status>', orders.update_order),
+    path('order/update/<int:id>', orders.updateDeliveryInformation),
     path('order/business/<str:id>', orders.getBusinessOrders),
+
 ]

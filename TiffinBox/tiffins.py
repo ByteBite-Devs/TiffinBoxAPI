@@ -38,7 +38,6 @@ def tiffin(request, id):
         if not tiffin:
             return JsonResponse({"status": "error", "message": "Tiffin not found"})
         tiffin["id"] = id
-        print(tiffin)
         return JsonResponse({"status": "success", "tiffin": tiffin})
     else:
         data = json.loads(request.body)
@@ -59,7 +58,6 @@ def business_tiffins(request, id):
     tiffins = db.child("Tiffins").order_by_child("business_id").equal_to(id).get().val()
     for key,tiffin in tiffins.items():
         tiffin["id"] = key
-    print(tiffins)
     return JsonResponse({"status": "success", "tiffins": tiffins})
 
 

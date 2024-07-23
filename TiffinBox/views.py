@@ -26,14 +26,6 @@ if not firebase_admin._apps:
     firebase_admin.initialize_app(cred)
 
 
-def validate_token(token):
-    try:
-        decoded_token = jwt.decode(token, options={"verify_signature": False})
-        print("Token is valid")
-    except Exception as e:
-        print(f"Token validation error: {e}")
-
-
 @csrf_exempt
 def login(request):
     data = json.loads(request.body)
@@ -45,8 +37,6 @@ def login(request):
         uid = user["localId"]
         custom_token = firebase_auth.create_custom_token(uid)
         user = db.child("Users").child(uid).get().val()
-        print(f"User: {user}")
-        print(f"Custom token: {custom_token.decode('utf-8')}")
         return JsonResponse({"status": "success", "user": user, "customToken": custom_token.decode("utf-8")})
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)})
@@ -93,7 +83,6 @@ def verify_phone_number(request):
 
 
 def index(request):
-
     # fetch all businesses and thier tiffins
     businesses = db.child("Users").order_by_child("role").equal_to("business").get().val()
     for key, business in businesses.items():
@@ -103,7 +92,4 @@ def index(request):
     for key, tiffin in tiffins.items():
         tiffin['id'] = key
     tiffins = list(tiffins.values())
-    print(tiffins)
-
-
     return JsonResponse({"status": "success", "businesses": businesses, "tiffins": tiffins})
