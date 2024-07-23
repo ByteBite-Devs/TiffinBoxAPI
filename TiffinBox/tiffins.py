@@ -24,6 +24,10 @@ db = firebase.database()
 @csrf_exempt
 def tiffins(request):
     tiffins = db.child("Tiffins").get().val()
+
+    for key, tiffin in tiffins.items():
+        tiffin["id"] = key
+    tiffins = list(tiffins.values())
     return JsonResponse({"status": "success", "tiffins": tiffins})
 
 

@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views, user, business
+from . import views, user, business, orders
 from . import tiffins as tiffin
 from . import authentication as auth
 
@@ -23,4 +23,9 @@ urlpatterns = [
     path('tiffins/business/<str:id>', tiffin.business_tiffins),
 
     path('business/<str:id>', business.get_business),
+
+    path('order/create', orders.create_order),
+    path('order/all/<str:id>', orders.get_orders),
+    path('order/<int:id>', orders.getOrder),
+    path('order/business/<str:id>', orders.getBusinessOrders),
 ]
