@@ -2,6 +2,7 @@ from django.urls import path
 from . import views, user, business, orders
 from . import tiffins as tiffin
 from . import authentication as auth
+from . import reviews as reviews
 
 urlpatterns = [
     path('', views.index),
@@ -30,5 +31,10 @@ urlpatterns = [
     path('order/update/<int:id>/<str:status>', orders.update_order),
     path('order/update/<int:id>', orders.updateDeliveryInformation),
     path('order/business/<str:id>', orders.getBusinessOrders),
+
+    path('review/add', reviews.add_review),
+    path('reviews/all/<str:id>', reviews.get_reviews),
+    path('review/update', reviews.update_review),
+    path('review/delete', reviews.delete_review),
 
 ]

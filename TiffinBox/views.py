@@ -34,10 +34,11 @@ def login(request):
 
     try:
         user = auth.sign_in_with_email_and_password(email, password)
-        uid = user["localId"]
-        custom_token = firebase_auth.create_custom_token(uid)
-        user = db.child("Users").child(uid).get().val()
-        return JsonResponse({"status": "success", "user": user, "customToken": custom_token.decode("utf-8")})
+        if user:
+            user = db.child("Users").child(user["localId"]).get().val()
+            return JsonResponse({"status": "success", "user": user})
+        else:
+            return JsonResponse({"status": "error", "message": "Invalid email or password"})
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)})
 
