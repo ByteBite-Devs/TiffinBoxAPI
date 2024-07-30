@@ -33,10 +33,10 @@ def login(request):
     password = data.get("password")
 
     try:
-        user = auth.sign_in_with_email_and_password(email, password)
-        if user:
-            user = db.child("Users").child(user["localId"]).get().val()
-            return JsonResponse({"status": "success", "user": user})
+        user_auth = auth.sign_in_with_email_and_password(email, password)
+        if user_auth:
+            user = db.child("Users").child(user_auth["localId"]).get().val()
+            return JsonResponse({"status": "success", "user": user, "user_auth": user_auth})
         else:
             return JsonResponse({"status": "error", "message": "Invalid email or password"})
     except Exception as e:

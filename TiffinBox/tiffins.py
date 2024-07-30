@@ -24,7 +24,6 @@ db = firebase.database()
 @csrf_exempt
 def tiffins(request):
     tiffins = db.child("Tiffins").get().val()
-
     for key, tiffin in tiffins.items():
         tiffin["id"] = key
     tiffins = list(tiffins.values())
@@ -51,11 +50,20 @@ def add_tiffin(request):
     data = json.loads(request.body)
     db.child("Tiffins").push(data)
     tiffins = db.child("Tiffins").get().val()
+    # update the id and ut svalue in the tiffin object in firebase if it id is already not preseen
+    for key, tiffin in tiffins.items():
+        if not tiffin["id"]:
+            tiffin["id"] = key
+            db.child("Tiffins").child(key).update(tiffin)
+    tiffins = db.child("Tiffins").get().val()
+    tiffins = list(tiffins.values())
     return JsonResponse({"status": "success", "tiffins": tiffins})
 
 
 def business_tiffins(request, id):
     tiffins = db.child("Tiffins").order_by_child("business_id").equal_to(id).get().val()
+    if not tiffins:
+        return JsonResponse({"status": "error", "message": "Tiffins not found"})
     for key,tiffin in tiffins.items():
         tiffin["id"] = key
     return JsonResponse({"status": "success", "tiffins": tiffins})

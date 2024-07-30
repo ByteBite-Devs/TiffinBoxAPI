@@ -42,3 +42,11 @@ def get_business(request, id):
     else:
         business["address"] = list(address.values())
     return JsonResponse({"status": "success", "business": business})
+
+
+def get_businesses(request):
+    businesses = db.child("Users").order_by_child("role").equal_to("business").get().val()
+    for key, business in businesses.items():
+        business['id'] = key
+    businesses = list(businesses.values())
+    return JsonResponse({"status": "success", "businesses": businesses})

@@ -95,3 +95,13 @@ def set_default_address(request, id):
         return JsonResponse({"status": "success", "address": address, "user": user})
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)})
+
+
+def update_address(request, id):
+    try:
+        data = json.loads(request.body)
+        db.child("Addresses").child(id).update(data)
+        address = db.child("Addresses").child(id).get().val()
+        return JsonResponse({"status": "success", "address": address})
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)})

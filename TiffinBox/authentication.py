@@ -53,6 +53,7 @@ def signup(request):
     password = data.get("password")
     phone = data.get("phoneNumber")
     name = data.get("fullName")
+    role = data.get("role")
 
     try:
         user = auth.create_user_with_email_and_password(email, password)
@@ -60,11 +61,12 @@ def signup(request):
             "email": email,
             "phone": phone,
             "name": name,
-            "role": "client",
+            "role": role,
             "status": "active",
             "image": ""
         }
         db.child("Users").child(user["localId"]).set(user_data)
+        user = db.child("Users").child(user["localId"]).get().val()
         return JsonResponse({"status": "success", "user": user})
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)})

@@ -87,10 +87,11 @@ def getBusinessOrders(request, id):
     business_tiffins = db.child("Tiffins").order_by_child("business_id").equal_to(id).get().val()
     if not business_tiffins:
         return JsonResponse({"status": "error", "message": "No tiffins found"})
-    tiffin_ids = [tiffin["id"] for tiffin in business_tiffins.values()]
     orders = []
     all_orders = db.child("Orders").get().val()
-
+    if not all_orders:
+        return JsonResponse({"status": "error", "message": "No orders found"})
+    tiffin_ids = [tiffin["id"] for tiffin in business_tiffins.values()]
     # Iterate over all orders and check if any of the items match the tiffin ids
     for order_id, order in all_orders.items():
         for item in order["items"]:
@@ -110,13 +111,15 @@ def getBusinessOrders(request, id):
 @csrf_exempt
 
 
-def update_order(request, id, status):
-    order = db.child("Orders").child(id).get().val()
+def update_order(request, id):
+    data = json.loads(request.body)
+    order = db.child("Orders").order_by_child("order_number").equal_to(id).get().val()
+    order['id'] = list(order.keys())[0]
     if not order:
         return JsonResponse({"status": "error", "message": "Order not found"})
-    order["order_status"] = status
-    db.child("Orders").child(id).update(order)
-    order = db.child("Orders").child(id).get().val()
+    order['order_status'] = data['order_status']
+    db.child("Orders").child(order["id"]).update(order)
+    order = db.child("Orders").order_by_child("order_number").equal_to(id).get().val()
     return JsonResponse({"status": "success", "order": order})
 
 
