@@ -39,6 +39,12 @@ def profile(request, id):
 def update_profile(request, id):
     try:
         data = json.loads(request.body)
+        user = db.child("Users").child(id).get().val()
+        if not user:
+            return JsonResponse({"status": "error", "message": "User not found"})
+        if user['role'] == "business":
+            data['business_name'] = data['name']
+            data['name'] = user['name']
         db.child("Users").child(id).update(data)
         user = db.child("Users").child(id).get().val()
         return JsonResponse({"status": "success", "user": user})
@@ -97,6 +103,7 @@ def set_default_address(request, id):
         return JsonResponse({"status": "error", "message": str(e)})
 
 
+@csrf_exempt
 def update_address(request, id):
     try:
         data = json.loads(request.body)

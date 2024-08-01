@@ -52,7 +52,6 @@ def add_tiffin(request):
     tiffins = db.child("Tiffins").get().val()
     # update the id and ut svalue in the tiffin object in firebase if it id is already not preseen
     for key, tiffin in tiffins.items():
-        if not tiffin["id"]:
             tiffin["id"] = key
             db.child("Tiffins").child(key).update(tiffin)
     tiffins = db.child("Tiffins").get().val()

@@ -105,7 +105,6 @@ def getBusinessOrders(request, id):
                 break  # No need to check further items in this order
     if not orders:
         return JsonResponse({"status": "error", "message": "No orders found for this business"})
-
     return JsonResponse({"status": "success", "orders": orders})
 
 @csrf_exempt
