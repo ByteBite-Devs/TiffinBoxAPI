@@ -78,7 +78,7 @@ def getOrder(request, id):
     address = db.child("Addresses").child(order["address"]).get().val()
     # add urder id (key to the order object)
     order["id"] = list(order.keys())[0]
-    return JsonResponse({"status": "success", "order": order, "address": address})
+    return JsonResponse({"status": "success", "order": order})
 
 
 @csrf_exempt
@@ -99,7 +99,6 @@ def getBusinessOrders(request, id):
                 order["id"] = order_id
                 orders.append(order)
                 order['user'] = db.child("Users").child(order['user_id']).get().val()
-                order['address'] = db.child("Addresses").child(order['address']).get().val()
                 order['tiffin'] = db.child("Tiffins").child(item["id"]).get().val()
                 order['quantity'] = item["quantity"]
                 break  # No need to check further items in this order

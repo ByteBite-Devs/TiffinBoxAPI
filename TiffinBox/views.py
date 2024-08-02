@@ -40,7 +40,7 @@ def login(request):
         else:
             return JsonResponse({"status": "error", "message": "Invalid email or password"})
     except Exception as e:
-        return JsonResponse({"status": "error", "message": str(e)})
+        return JsonResponse({"status": "error", "message": "Invalid email or password"})
 
 
 @csrf_exempt
