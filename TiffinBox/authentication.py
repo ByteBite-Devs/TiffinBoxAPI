@@ -36,7 +36,7 @@ def loginWithGoogle(request):
                 "name": name,
                 "role": "client",
                 "status": "active",
-                "image": photoUrl
+                "profileImage": photoUrl
             }
             user = db.child("Users").child(id).set(user_data)
             return JsonResponse({"status": "success", "user": user})
@@ -63,7 +63,7 @@ def signup(request):
             "name": name,
             "role": role,
             "status": "active",
-            "image": ""
+            "profileImage": ""
         }
         db.child("Users").child(user["localId"]).set(user_data)
         user = db.child("Users").child(user["localId"]).get().val()
@@ -91,7 +91,7 @@ def loginWithPhone(request):
                 "name": name,
                 "role": "client",
                 "status": "active",
-                "image": photoUrl
+                "profileImage": photoUrl
             }
             db.child("Users").child(id).set(user_data)
             user = db.child("Users").child(id).get().val()
@@ -118,7 +118,7 @@ def business_signup(request):
             "business_name": business_name,
             "role": "business",
             "status": "active",
-            "image": "",
+            "profileImage": "",
             "name": '',
             "verified": False
         }
